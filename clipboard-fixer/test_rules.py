@@ -9,7 +9,7 @@ from rules import (
     _remove_amp,
     _x_to_vxtwitter,
     _tiktok_to_tnktok,
-    _facebook_to_facebed,
+    _facebook_to_fixacebook,
     _unwrap_facebook,
     _unwrap_google,
     _force_https,
@@ -97,32 +97,32 @@ class TestTiktokToTnktok(unittest.TestCase):
         self.assertEqual(_tiktok_to_tnktok(url), url)
 
 
-class TestFacebookToFacebed(unittest.TestCase):
+class TestFacebookToFixacebook(unittest.TestCase):
     def test_replaces_facebook_com(self):
         self.assertEqual(
-            _facebook_to_facebed("https://www.facebook.com/user/videos/123"),
-            "https://facebed.com/user/videos/123",
+            _facebook_to_fixacebook("https://www.facebook.com/user/videos/123"),
+            "https://fixacebook.com/user/videos/123",
         )
 
     def test_replaces_bare_facebook_com(self):
         self.assertEqual(
-            _facebook_to_facebed("https://facebook.com/reel/123"),
-            "https://facebed.com/reel/123",
+            _facebook_to_fixacebook("https://facebook.com/reel/123"),
+            "https://fixacebook.com/reel/123",
         )
 
     def test_preserves_path_and_query(self):
         self.assertEqual(
-            _facebook_to_facebed("https://www.facebook.com/watch?v=123456"),
-            "https://facebed.com/watch?v=123456",
+            _facebook_to_fixacebook("https://www.facebook.com/watch?v=123456"),
+            "https://fixacebook.com/watch?v=123456",
         )
 
     def test_does_not_affect_l_facebook_com(self):
         url = "https://l.facebook.com/l.php?u=https%3A%2F%2Fexample.com"
-        self.assertEqual(_facebook_to_facebed(url), url)
+        self.assertEqual(_facebook_to_fixacebook(url), url)
 
     def test_does_not_affect_other_domains(self):
         url = "https://example.com/page"
-        self.assertEqual(_facebook_to_facebed(url), url)
+        self.assertEqual(_facebook_to_fixacebook(url), url)
 
 
 class TestUnwrapFacebook(unittest.TestCase):

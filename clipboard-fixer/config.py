@@ -9,7 +9,7 @@ _DEFAULTS = {
         "remove_amp": True,
         "x_to_vxtwitter": True,
         "tiktok_to_tnktok": True,
-        "facebook_to_facebed": True,
+        "facebook_to_fixacebook": True,
         "unwrap_facebook": True,
         "unwrap_google": True,
         "force_https": True,

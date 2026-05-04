@@ -47,11 +47,11 @@ def _tiktok_to_tnktok(url: str) -> str:
     return url
 
 
-def _facebook_to_facebed(url: str) -> str:
+def _facebook_to_fixacebook(url: str) -> str:
     parsed = urllib.parse.urlparse(url)
     host = parsed.netloc.lower()
     if host in ("facebook.com", "www.facebook.com"):
-        return parsed._replace(netloc="facebed.com").geturl()
+        return parsed._replace(netloc="fixacebook.com").geturl()
     return url
 
 
@@ -89,7 +89,7 @@ def get_default_rules(config: dict) -> list[Rule]:
         Rule("remove_amp", enabled.get("remove_amp", True), _remove_amp),
         Rule("x_to_vxtwitter", enabled.get("x_to_vxtwitter", True), _x_to_vxtwitter),
         Rule("tiktok_to_tnktok", enabled.get("tiktok_to_tnktok", True), _tiktok_to_tnktok),
-        Rule("facebook_to_facebed", enabled.get("facebook_to_facebed", True), _facebook_to_facebed),
+        Rule("facebook_to_fixacebook", enabled.get("facebook_to_fixacebook", True), _facebook_to_fixacebook),
         Rule("unwrap_facebook", enabled.get("unwrap_facebook", True), _unwrap_facebook),
         Rule("unwrap_google", enabled.get("unwrap_google", True), _unwrap_google),
         Rule("force_https", enabled.get("force_https", True), _force_https),
