@@ -1,13 +1,15 @@
 import json
 import os
 
-_CONFIG_FILE = os.path.join(os.path.dirname(__file__), "config.json")
+from PyQt6.QtCore import QStandardPaths
 
 _DEFAULTS = {
     "enabled_rules": {
         "strip_utm": True,
         "remove_amp": True,
         "x_to_vxtwitter": True,
+        "tiktok_to_tnktok": True,
+        "facebook_to_facebed": True,
         "unwrap_facebook": True,
         "unwrap_google": True,
         "force_https": True,
@@ -15,11 +17,18 @@ _DEFAULTS = {
 }
 
 
+def _config_path() -> str:
+    config_dir = QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppConfigLocation)
+    os.makedirs(config_dir, exist_ok=True)
+    return os.path.join(config_dir, "config.json")
+
+
 def load_config() -> dict:
-    if not os.path.exists(_CONFIG_FILE):
+    path = _config_path()
+    if not os.path.exists(path):
         return dict(_DEFAULTS)
     try:
-        with open(_CONFIG_FILE) as f:
+        with open(path) as f:
             data = json.load(f)
         merged = dict(_DEFAULTS)
         merged.update(data)
@@ -29,5 +38,5 @@ def load_config() -> dict:
 
 
 def save_config(config: dict) -> None:
-    with open(_CONFIG_FILE, "w") as f:
+    with open(_config_path(), "w") as f:
         json.dump(config, f, indent=2)

@@ -39,6 +39,22 @@ def _x_to_vxtwitter(url: str) -> str:
     return url
 
 
+def _tiktok_to_tnktok(url: str) -> str:
+    parsed = urllib.parse.urlparse(url)
+    host = parsed.netloc.lower()
+    if host in ("tiktok.com", "www.tiktok.com"):
+        return parsed._replace(netloc="tnktok.com").geturl()
+    return url
+
+
+def _facebook_to_facebed(url: str) -> str:
+    parsed = urllib.parse.urlparse(url)
+    host = parsed.netloc.lower()
+    if host in ("facebook.com", "www.facebook.com"):
+        return parsed._replace(netloc="facebed.com").geturl()
+    return url
+
+
 def _unwrap_facebook(url: str) -> str:
     parsed = urllib.parse.urlparse(url)
     if parsed.netloc in ("l.facebook.com",) and parsed.path == "/l.php":
@@ -72,6 +88,8 @@ def get_default_rules(config: dict) -> list[Rule]:
         Rule("strip_utm", enabled.get("strip_utm", True), _strip_utm),
         Rule("remove_amp", enabled.get("remove_amp", True), _remove_amp),
         Rule("x_to_vxtwitter", enabled.get("x_to_vxtwitter", True), _x_to_vxtwitter),
+        Rule("tiktok_to_tnktok", enabled.get("tiktok_to_tnktok", True), _tiktok_to_tnktok),
+        Rule("facebook_to_facebed", enabled.get("facebook_to_facebed", True), _facebook_to_facebed),
         Rule("unwrap_facebook", enabled.get("unwrap_facebook", True), _unwrap_facebook),
         Rule("unwrap_google", enabled.get("unwrap_google", True), _unwrap_google),
         Rule("force_https", enabled.get("force_https", True), _force_https),
