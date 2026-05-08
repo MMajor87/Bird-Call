@@ -1,0 +1,16 @@
+{
+  "reply_prefix": "Cleaned link:",
+  "delete_original": false,
+  "suppress_original_embeds": true,
+  "watched_channel_ids": [],
+  "enabled_rules": {
+    "strip_utm": true,
+    "remove_amp": true,
+    "x_to_vxtwitter": true,
+    "tiktok_to_tnktok": true,
+    "facebook_to_fixacebook": true,
+    "unwrap_facebook": true,
+    "unwrap_google": true,
+    "force_https": true
+  }
+}
