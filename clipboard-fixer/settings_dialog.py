@@ -12,7 +12,6 @@ _RULE_LABELS: dict[str, str] = {
     "remove_amp":             "Remove AMP suffixes",
     "x_to_vxtwitter":         "Replace x.com with vxtwitter.com",
     "tiktok_to_tnktok":       "Replace tiktok.com with tnktok.com",
-    "instagram_to_instagramez": "Replace instagram.com with instagramez.com",
     "facebook_to_fixacebook": "Replace facebook.com with fixacebook.com",
     "unwrap_facebook":        "Unwrap Facebook redirect links",
     "unwrap_google":          "Unwrap Google redirect links",

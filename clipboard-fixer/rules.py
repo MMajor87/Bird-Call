@@ -47,14 +47,6 @@ def _tiktok_to_tnktok(url: str) -> str:
     return url
 
 
-def _instagram_to_instagramez(url: str) -> str:
-    parsed = urllib.parse.urlparse(url)
-    host = parsed.netloc.lower()
-    if host in ("instagram.com", "www.instagram.com"):
-        return parsed._replace(netloc="instagramez.com").geturl()
-    return url
-
-
 def _facebook_to_fixacebook(url: str) -> str:
     parsed = urllib.parse.urlparse(url)
     host = parsed.netloc.lower()
@@ -97,7 +89,6 @@ def get_default_rules(config: dict) -> list[Rule]:
         Rule("remove_amp", enabled.get("remove_amp", True), _remove_amp),
         Rule("x_to_vxtwitter", enabled.get("x_to_vxtwitter", True), _x_to_vxtwitter),
         Rule("tiktok_to_tnktok", enabled.get("tiktok_to_tnktok", True), _tiktok_to_tnktok),
-        Rule("instagram_to_instagramez", enabled.get("instagram_to_instagramez", True), _instagram_to_instagramez),
         Rule("facebook_to_fixacebook", enabled.get("facebook_to_fixacebook", True), _facebook_to_fixacebook),
         Rule("unwrap_facebook", enabled.get("unwrap_facebook", True), _unwrap_facebook),
         Rule("unwrap_google", enabled.get("unwrap_google", True), _unwrap_google),
