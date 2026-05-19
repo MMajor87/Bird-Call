@@ -1,19 +1,22 @@
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QCheckBox, QDialogButtonBox, QLabel, QFrame
 )
+from PyQt6.QtCore import Qt
 
 import autostart
 from config import save_config
+from version import VERSION
 
 _RULE_LABELS: dict[str, str] = {
-    "strip_utm":           "Strip UTM tracking parameters",
-    "remove_amp":          "Remove AMP suffixes",
-    "x_to_vxtwitter":      "Replace x.com with vxtwitter.com",
-    "tiktok_to_tnktok":    "Replace tiktok.com with tnktok.com",
+    "strip_utm":              "Strip UTM tracking parameters",
+    "remove_amp":             "Remove AMP suffixes",
+    "x_to_vxtwitter":         "Replace x.com with vxtwitter.com",
+    "tiktok_to_tnktok":       "Replace tiktok.com with tnktok.com",
+    "instagram_to_instagramez": "Replace instagram.com with instagramez.com",
     "facebook_to_fixacebook": "Replace facebook.com with fixacebook.com",
-    "unwrap_facebook":     "Unwrap Facebook redirect links",
-    "unwrap_google":       "Unwrap Google redirect links",
-    "force_https":         "Force HTTPS on HTTP links",
+    "unwrap_facebook":        "Unwrap Facebook redirect links",
+    "unwrap_google":          "Unwrap Google redirect links",
+    "force_https":            "Force HTTPS on HTTP links",
 }
 
 
@@ -50,6 +53,11 @@ class SettingsDialog(QDialog):
         buttons.accepted.connect(self._save_and_accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
+
+        version_label = QLabel(f"Bird-Call v{VERSION}")
+        version_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        version_label.setStyleSheet("color: gray; font-size: 10px;")
+        layout.addWidget(version_label)
 
         self.setLayout(layout)
         self.setMinimumWidth(360)
