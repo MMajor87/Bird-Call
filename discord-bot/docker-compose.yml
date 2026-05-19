@@ -1,0 +1,9 @@
+services:
+  bird-call-bot:
+    build: .
+    container_name: bird-call-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./config.json:/app/config.json:ro
