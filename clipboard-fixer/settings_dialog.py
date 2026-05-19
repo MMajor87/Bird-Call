@@ -5,18 +5,8 @@ from PyQt6.QtCore import Qt
 
 import autostart
 from config import save_config
+from rules import get_default_rules
 from version import VERSION
-
-_RULE_LABELS: dict[str, str] = {
-    "strip_utm":              "Strip UTM tracking parameters",
-    "remove_amp":             "Remove AMP suffixes",
-    "x_to_vxtwitter":         "Replace x.com with vxtwitter.com",
-    "tiktok_to_tnktok":       "Replace tiktok.com with tnktok.com",
-    "facebook_to_fixacebook": "Replace facebook.com with fixacebook.com",
-    "unwrap_facebook":        "Unwrap Facebook redirect links",
-    "unwrap_google":          "Unwrap Google redirect links",
-    "force_https":            "Force HTTPS on HTTP links",
-}
 
 
 class SettingsDialog(QDialog):
@@ -30,10 +20,10 @@ class SettingsDialog(QDialog):
         layout.addWidget(QLabel("Enable / disable correction rules:"))
         self._checkboxes: dict[str, QCheckBox] = {}
         enabled = config.get("enabled_rules", {})
-        for key, label in _RULE_LABELS.items():
-            cb = QCheckBox(label)
-            cb.setChecked(enabled.get(key, True))
-            self._checkboxes[key] = cb
+        for rule in get_default_rules({}):
+            cb = QCheckBox(rule.label)
+            cb.setChecked(enabled.get(rule.name, True))
+            self._checkboxes[rule.name] = cb
             layout.addWidget(cb)
 
         separator = QFrame()

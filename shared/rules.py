@@ -9,6 +9,7 @@ class Rule:
     name: str
     enabled: bool
     apply: Callable[[str], str] = field(repr=False)
+    label: str = ""
 
 
 def is_link(text: str) -> bool:
@@ -92,14 +93,14 @@ def _force_https(url: str) -> str:
 def get_default_rules(config: dict) -> list[Rule]:
     enabled = config.get("enabled_rules", {})
     return [
-        Rule("strip_utm", enabled.get("strip_utm", True), _strip_utm),
-        Rule("remove_amp", enabled.get("remove_amp", True), _remove_amp),
-        Rule("x_to_vxtwitter", enabled.get("x_to_vxtwitter", True), _x_to_vxtwitter),
-        Rule("tiktok_to_tnktok", enabled.get("tiktok_to_tnktok", True), _tiktok_to_tnktok),
-        Rule("facebook_to_fixacebook", enabled.get("facebook_to_fixacebook", True), _facebook_to_fixacebook),
-        Rule("unwrap_facebook", enabled.get("unwrap_facebook", True), _unwrap_facebook),
-        Rule("unwrap_google", enabled.get("unwrap_google", True), _unwrap_google),
-        Rule("force_https", enabled.get("force_https", True), _force_https),
+        Rule("strip_utm", enabled.get("strip_utm", True), _strip_utm, "Strip UTM tracking parameters"),
+        Rule("remove_amp", enabled.get("remove_amp", True), _remove_amp, "Remove AMP suffixes"),
+        Rule("x_to_vxtwitter", enabled.get("x_to_vxtwitter", True), _x_to_vxtwitter, "Replace x.com with vxtwitter.com"),
+        Rule("tiktok_to_tnktok", enabled.get("tiktok_to_tnktok", True), _tiktok_to_tnktok, "Replace tiktok.com with tnktok.com"),
+        Rule("facebook_to_fixacebook", enabled.get("facebook_to_fixacebook", True), _facebook_to_fixacebook, "Replace facebook.com with fixacebook.com"),
+        Rule("unwrap_facebook", enabled.get("unwrap_facebook", True), _unwrap_facebook, "Unwrap Facebook redirect links"),
+        Rule("unwrap_google", enabled.get("unwrap_google", True), _unwrap_google, "Unwrap Google redirect links"),
+        Rule("force_https", enabled.get("force_https", True), _force_https, "Force HTTPS on HTTP links"),
     ]
 
 

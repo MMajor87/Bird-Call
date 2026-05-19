@@ -99,7 +99,7 @@ class TrayIcon(QSystemTrayIcon):
     def _open_settings(self):
         dialog = SettingsDialog(load_config(), parent=None)
         if dialog.exec():
-            self._watcher.rules = get_default_rules(load_config())
+            self._watcher.rules = get_default_rules(dialog._config)
 
     def _rebuild_history_menu(self):
         if not self._watcher._history_dirty:
