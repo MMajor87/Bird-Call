@@ -1,1 +1,1 @@
-.\.venv\Scripts\python.exe -m PyInstaller --onefile --windowed --name Bird-Call --add-data "BlueJay.png;." main.py
+.\.venv\Scripts\python.exe -m PyInstaller --onefile --windowed --name Bird-Call --add-data "BlueJay.png;." --paths ".." main.py

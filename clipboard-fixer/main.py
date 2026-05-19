@@ -1,12 +1,11 @@
 import collections
 import os
 import sys
-import urllib.parse
 from PyQt6.QtWidgets import QApplication, QSystemTrayIcon, QMenu
 from PyQt6.QtGui import QAction, QClipboard, QIcon
 from PyQt6.QtCore import QObject, QTimer, pyqtSignal
 
-from rules import clean_url, get_default_rules
+from rules import clean_url, get_default_rules, is_link
 from config import load_config
 from settings_dialog import SettingsDialog
 from version import VERSION
@@ -21,13 +20,6 @@ def _resource_path(filename: str) -> str:
 def _make_icon() -> QIcon:
     return QIcon(_resource_path("BlueJay.png"))
 
-
-def is_link(text: str) -> bool:
-    try:
-        parsed = urllib.parse.urlparse(text.strip())
-        return parsed.scheme in ("http", "https") and bool(parsed.netloc)
-    except ValueError:
-        return False
 
 
 class ClipboardWatcher(QObject):

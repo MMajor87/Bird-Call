@@ -1,7 +1,6 @@
 import re
-import urllib.parse
 
-from rules import Rule, clean_url
+from rules import Rule, clean_url, is_link
 
 
 URL_PATTERN = re.compile(r"https?://[^\s<>()]+", re.IGNORECASE)
@@ -14,14 +13,6 @@ def _trim_trailing_punctuation(url: str) -> tuple[str, str]:
         suffix = url[-1] + suffix
         url = url[:-1]
     return url, suffix
-
-
-def is_link(text: str) -> bool:
-    try:
-        parsed = urllib.parse.urlparse(text.strip())
-        return parsed.scheme in ("http", "https") and bool(parsed.netloc)
-    except ValueError:
-        return False
 
 
 def find_cleaned_links(message: str, rules: list[Rule]) -> list[tuple[str, str]]:
