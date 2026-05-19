@@ -9,6 +9,7 @@ from PyQt6.QtCore import QObject, QTimer, pyqtSignal
 from rules import clean_url, get_default_rules
 from config import load_config
 from settings_dialog import SettingsDialog
+from version import VERSION
 
 
 def _resource_path(filename: str) -> str:
@@ -137,7 +138,8 @@ class TrayIcon(QSystemTrayIcon):
 
 def main():
     app = QApplication(sys.argv)
-    app.setApplicationName("clipboard-fixer")
+    app.setApplicationName("Bird-Call")
+    app.setApplicationVersion(VERSION)
     app.setQuitOnLastWindowClosed(False)
 
     config = load_config()
