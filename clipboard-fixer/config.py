@@ -23,18 +23,24 @@ def _config_path() -> str:
     return os.path.join(config_dir, "config.json")
 
 
+def _merge_defaults(data: dict) -> dict:
+    merged = dict(_DEFAULTS)
+    merged["enabled_rules"] = dict(_DEFAULTS["enabled_rules"])
+    merged.update({k: v for k, v in data.items() if k != "enabled_rules"})
+    merged["enabled_rules"].update(data.get("enabled_rules", {}))
+    return merged
+
+
 def load_config() -> dict:
     path = _config_path()
     if not os.path.exists(path):
-        return dict(_DEFAULTS)
+        return _merge_defaults({})
     try:
         with open(path) as f:
             data = json.load(f)
-        merged = dict(_DEFAULTS)
-        merged.update(data)
-        return merged
+        return _merge_defaults(data)
     except (json.JSONDecodeError, OSError):
-        return dict(_DEFAULTS)
+        return _merge_defaults({})
 
 
 def save_config(config: dict) -> None:

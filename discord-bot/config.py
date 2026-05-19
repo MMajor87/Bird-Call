@@ -24,7 +24,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
 def _merge_defaults(data: dict[str, Any]) -> dict[str, Any]:
     merged = dict(DEFAULT_CONFIG)
     merged["enabled_rules"] = dict(DEFAULT_CONFIG["enabled_rules"])
-    merged.update(data)
+    merged.update({k: v for k, v in data.items() if k != "enabled_rules"})
     merged["enabled_rules"].update(data.get("enabled_rules", {}))
     return merged
 
