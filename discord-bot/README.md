@@ -49,6 +49,40 @@ Then run:
 python bot.py
 ```
 
+## Docker Setup
+
+From `discord-bot`:
+
+```powershell
+Copy-Item .env.example .env
+Copy-Item config.example.json config.json
+```
+
+Edit `.env` and set:
+
+```text
+DISCORD_BOT_TOKEN=your-token-here
+```
+
+Build and run with Docker:
+
+```powershell
+docker build -t bird-call-bot .
+docker run --rm --name bird-call-bot --env-file .env -v ${PWD}/config.json:/app/config.json:ro bird-call-bot
+```
+
+Or with Docker Compose:
+
+```powershell
+docker compose up -d --build
+```
+
+To stop:
+
+```powershell
+docker compose down
+```
+
 ## Config
 
 `config.json` controls the bot:

@@ -45,18 +45,27 @@ class BirdCallBot(discord.Client):
     async def on_ready(self) -> None:
         assert self.user is not None
         LOGGER.info("Logged in as %s (%s)", self.user, self.user.id)
+        guild_names = ", ".join(f"{guild.name} ({guild.id})" for guild in self.guilds) or "none"
+        LOGGER.info("Connected guilds: %s", guild_names)
 
     async def on_message(self, message: discord.Message) -> None:
         if message.author.bot:
             return
 
         if self.watched_channel_ids and message.channel.id not in self.watched_channel_ids:
+            LOGGER.info(
+                "Ignoring message in channel %s because it is not in watched_channel_ids",
+                message.channel.id,
+            )
             return
 
+        LOGGER.info("Received message %s in channel %s", message.id, message.channel.id)
         cleaned_links = find_cleaned_links(message.content, self.rules)
         if not cleaned_links:
+            LOGGER.info("No cleanable links found in message %s", message.id)
             return
 
+        LOGGER.info("Found %s cleanable link(s) in message %s", len(cleaned_links), message.id)
         if self.config.get("suppress_original_embeds", True):
             try:
                 await message.edit(suppress=True)
