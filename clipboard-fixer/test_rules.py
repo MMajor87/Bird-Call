@@ -15,6 +15,8 @@ from rules import (
     _force_https,
 )
 from main import is_tiktok_redirect_url
+from updates import Release, is_newer_release
+from packaging.version import Version
 
 
 class TestStripUtm(unittest.TestCase):
@@ -103,6 +105,16 @@ class TestTikTokRedirectDetection(unittest.TestCase):
         self.assertTrue(is_tiktok_redirect_url("https://vm.tiktok.com/ZM123abc/"))
         self.assertTrue(is_tiktok_redirect_url("https://www.tiktok.com/t/ZP8WSnC62/"))
         self.assertFalse(is_tiktok_redirect_url("https://www.tiktok.com/@user/video/123"))
+
+
+class TestUpdateChecks(unittest.TestCase):
+    def test_detects_newer_release(self):
+        release = Release(Version("1.0.2"), "https://example.com/releases/tag/v1.0.2")
+        self.assertTrue(is_newer_release(release, "1.0.1"))
+
+    def test_ignores_current_release(self):
+        release = Release(Version("1.0.1"), "https://example.com/releases/tag/v1.0.1")
+        self.assertFalse(is_newer_release(release, "1.0.1"))
 
 
 class TestFacebookToFixacebook(unittest.TestCase):
