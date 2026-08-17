@@ -1,6 +1,10 @@
 import collections
 import os
 import sys
+import threading
+import urllib.error
+import urllib.parse
+import urllib.request
 from PyQt6.QtWidgets import QApplication, QSystemTrayIcon, QMenu
 from PyQt6.QtGui import QAction, QClipboard, QIcon
 from PyQt6.QtCore import QObject, QTimer, pyqtSignal
@@ -9,6 +13,10 @@ from rules import clean_url, get_default_rules, is_link
 from config import load_config
 from settings_dialog import SettingsDialog
 from version import VERSION
+
+
+TIKTOK_REDIRECT_HOSTS = {"vm.tiktok.com", "vt.tiktok.com"}
+TIKTOK_REDIRECT_TIMEOUT_SECONDS = 10
 
 
 def _resource_path(filename: str) -> str:
@@ -22,8 +30,32 @@ def _make_icon() -> QIcon:
 
 
 
+def is_tiktok_redirect_url(url: str) -> bool:
+    parsed = urllib.parse.urlparse(url)
+    host = parsed.netloc.lower()
+    return host in TIKTOK_REDIRECT_HOSTS or (
+        host in ("tiktok.com", "www.tiktok.com") and parsed.path.startswith("/t/")
+    )
+
+
+def canonical_tiktok_url(url: str) -> str | None:
+    """Follow a TikTok share redirect and return its canonical web URL."""
+    request = urllib.request.Request(url, headers={"User-Agent": "BirdCall/1.0"})
+    try:
+        with urllib.request.urlopen(request, timeout=TIKTOK_REDIRECT_TIMEOUT_SECONDS) as response:
+            resolved = response.geturl()
+    except (urllib.error.URLError, TimeoutError, ValueError):
+        return None
+
+    parsed = urllib.parse.urlparse(resolved)
+    if parsed.netloc.lower() not in ("tiktok.com", "www.tiktok.com"):
+        return None
+    return parsed._replace(query="", fragment="").geturl()
+
+
 class ClipboardWatcher(QObject):
     corrected = pyqtSignal(str, str)  # (original_url, cleaned_url)
+    redirect_resolved = pyqtSignal(str, object)  # (original_url, canonical_url | None)
 
     def __init__(self, rules):
         super().__init__()
@@ -36,12 +68,16 @@ class ClipboardWatcher(QObject):
         assert clipboard is not None
         self.clipboard: QClipboard = clipboard
         self.clipboard.dataChanged.connect(self.on_clipboard_changed)
+        self.redirect_resolved.connect(self._on_tiktok_redirect_resolved)
 
     def on_clipboard_changed(self):
         if self._setting or self.paused:
             return
         text = self.clipboard.text().strip()
         if not text or not is_link(text):
+            return
+        if is_tiktok_redirect_url(text):
+            threading.Thread(target=self._resolve_tiktok_redirect, args=(text,), daemon=True).start()
             return
         cleaned = clean_url(text, self.rules)
         if cleaned == text:
@@ -50,6 +86,17 @@ class ClipboardWatcher(QObject):
         # setText() synchronously inside a dataChanged handler is discarded
         # because Qt hasn't finished processing the original clipboard event.
         QTimer.singleShot(0, lambda: self._apply_correction(text, cleaned))
+
+    def _resolve_tiktok_redirect(self, original: str):
+        self.redirect_resolved.emit(original, canonical_tiktok_url(original))
+
+    def _on_tiktok_redirect_resolved(self, original: str, canonical: str | None):
+        # Do not overwrite a newer clipboard value while the request was in flight.
+        if self.paused or self.clipboard.text().strip() != original or not canonical:
+            return
+        cleaned = clean_url(canonical, self.rules)
+        if cleaned != original:
+            self._apply_correction(original, cleaned)
 
     def _apply_correction(self, original: str, cleaned: str):
         self._setting = True

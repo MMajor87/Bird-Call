@@ -1,10 +1,12 @@
 import re
+import urllib.parse
 
 from rules import Rule, clean_url, is_link
 
 
 URL_PATTERN = re.compile(r"https?://[^\s<>()]+", re.IGNORECASE)
 TRAILING_PUNCTUATION = ".,!?;:"
+TIKTOK_REDIRECT_HOSTS = {"vm.tiktok.com", "vt.tiktok.com"}
 
 
 def _trim_trailing_punctuation(url: str) -> tuple[str, str]:
@@ -14,6 +16,14 @@ def _trim_trailing_punctuation(url: str) -> tuple[str, str]:
         url = url[:-1]
     return url, suffix
 
+
+def is_tiktok_redirect_url(url: str) -> bool:
+    """Return whether a TikTok URL must be expanded before conversion."""
+    parsed = urllib.parse.urlparse(url)
+    host = parsed.netloc.lower()
+    return host in TIKTOK_REDIRECT_HOSTS or (
+        host in ("tiktok.com", "www.tiktok.com") and parsed.path.startswith("/t/")
+    )
 
 def find_cleaned_links(message: str, rules: list[Rule]) -> list[tuple[str, str]]:
     cleaned_links: list[tuple[str, str]] = []

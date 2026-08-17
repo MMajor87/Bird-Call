@@ -1,9 +1,16 @@
 services:
   bird-call-bot:
-    build: .
+    build:
+      context: ..
+      dockerfile: discord-bot/Dockerfile
     container_name: bird-call-bot
     restart: unless-stopped
     env_file:
       - .env
     volumes:
       - ./config.json:/app/config.json:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

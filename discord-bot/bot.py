@@ -1,17 +1,26 @@
 import logging
 import os
+import re
+import urllib.parse
 
+import aiohttp
 import discord
 from dotenv import load_dotenv
 
 from config import load_config
-from link_cleaner import find_cleaned_links
+from link_cleaner import (
+    TRAILING_PUNCTUATION,
+    URL_PATTERN,
+    find_cleaned_links,
+    is_tiktok_redirect_url,
+)
 from rules import get_default_rules
 
 
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger("bird-call-bot")
 MAX_DISCORD_MESSAGE_LENGTH = 2000
+TIKTOK_REDIRECT_TIMEOUT_SECONDS = 10
 
 
 def _normalize_channel_ids(raw_channel_ids: list[object]) -> set[int]:
@@ -31,6 +40,52 @@ def _format_reply(prefix: str, cleaned_links: list[tuple[str, str]]) -> str:
     if len(reply) <= MAX_DISCORD_MESSAGE_LENGTH:
         return reply
     return reply[: MAX_DISCORD_MESSAGE_LENGTH - 3] + "..."
+
+
+async def _expand_tiktok_redirects(message_content: str) -> str:
+    """Expand TikTok short links before converting them to TNKTOK URLs."""
+    candidates: list[tuple[re.Match[str], str, str]] = []
+    for match in URL_PATTERN.finditer(message_content):
+        url = match.group(0)
+        suffix = ""
+        while url and url[-1] in TRAILING_PUNCTUATION:
+            suffix = url[-1] + suffix
+            url = url[:-1]
+        if is_tiktok_redirect_url(url):
+            candidates.append((match, url, suffix))
+
+    if not candidates:
+        return message_content
+
+    timeout = aiohttp.ClientTimeout(total=TIKTOK_REDIRECT_TIMEOUT_SECONDS)
+    replacements: dict[tuple[int, int], str] = {}
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; BirdCall/1.0)"}
+    async with aiohttp.ClientSession(timeout=timeout, headers=headers) as session:
+        for match, url, suffix in candidates:
+            try:
+                async with session.get(url, allow_redirects=True, max_redirects=5) as response:
+                    resolved = str(response.url)
+            except (aiohttp.ClientError, TimeoutError):
+                LOGGER.warning("Could not expand TikTok redirect URL: %s", url)
+                continue
+
+            parsed = urllib.parse.urlparse(resolved)
+            if parsed.netloc.lower() not in ("tiktok.com", "www.tiktok.com"):
+                LOGGER.warning("TikTok redirect resolved to an unexpected host: %s", resolved)
+                continue
+            canonical_url = parsed._replace(query="", fragment="").geturl()
+            replacements[(match.start(), match.end())] = canonical_url + suffix
+
+    if not replacements:
+        return message_content
+
+    parts: list[str] = []
+    cursor = 0
+    for (start, end), replacement in replacements.items():
+        parts.extend((message_content[cursor:start], replacement))
+        cursor = end
+    parts.append(message_content[cursor:])
+    return "".join(parts)
 
 
 class BirdCallBot(discord.Client):
@@ -60,7 +115,8 @@ class BirdCallBot(discord.Client):
             return
 
         LOGGER.info("Received message %s in channel %s", message.id, message.channel.id)
-        cleaned_links = find_cleaned_links(message.content, self.rules)
+        expanded_content = await _expand_tiktok_redirects(message.content)
+        cleaned_links = find_cleaned_links(expanded_content, self.rules)
         if not cleaned_links:
             LOGGER.info("No cleanable links found in message %s", message.id)
             return
