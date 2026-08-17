@@ -14,6 +14,7 @@ from rules import (
     _unwrap_google,
     _force_https,
 )
+from main import is_tiktok_redirect_url
 
 
 class TestStripUtm(unittest.TestCase):
@@ -95,6 +96,13 @@ class TestTiktokToTnktok(unittest.TestCase):
     def test_does_not_affect_other_domains(self):
         url = "https://example.com/path"
         self.assertEqual(_tiktok_to_tnktok(url), url)
+
+
+class TestTikTokRedirectDetection(unittest.TestCase):
+    def test_identifies_short_tiktok_hosts_and_paths(self):
+        self.assertTrue(is_tiktok_redirect_url("https://vm.tiktok.com/ZM123abc/"))
+        self.assertTrue(is_tiktok_redirect_url("https://www.tiktok.com/t/ZP8WSnC62/"))
+        self.assertFalse(is_tiktok_redirect_url("https://www.tiktok.com/@user/video/123"))
 
 
 class TestFacebookToFixacebook(unittest.TestCase):

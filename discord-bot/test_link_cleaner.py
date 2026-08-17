@@ -1,7 +1,7 @@
 import unittest
 import urllib.parse
 
-from link_cleaner import find_cleaned_links
+from link_cleaner import find_cleaned_links, is_tiktok_redirect_url
 from rules import get_default_rules
 
 
@@ -32,6 +32,11 @@ class TestFindCleanedLinks(unittest.TestCase):
                 ("http://example.com", "https://example.com"),
             ],
         )
+
+    def test_identifies_tiktok_redirect_urls(self):
+        self.assertTrue(is_tiktok_redirect_url("https://vm.tiktok.com/ZM123abc/"))
+        self.assertTrue(is_tiktok_redirect_url("https://www.tiktok.com/t/ZP8WSnC62/"))
+        self.assertFalse(is_tiktok_redirect_url("https://www.tiktok.com/@user/video/123"))
 
     def test_ignores_clean_links(self):
         links = find_cleaned_links("already clean https://example.com/path", self.rules)
